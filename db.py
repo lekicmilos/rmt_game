@@ -3,9 +3,6 @@ from mysql.connector import errorcode
 import configparser
 
 
-# creating the object of configparser
-
-
 class DB():
 
     def connect(self):
