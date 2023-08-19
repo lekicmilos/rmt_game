@@ -1,20 +1,22 @@
 import mysql.connector
 from mysql.connector import errorcode
+import configparser
+
+
+# creating the object of configparser
+
 
 class DB():
 
     def connect(self):
-        # Parametri za povezivanje
-        config = {
-            'user': 'root',
-            'password': 'root',
-            'host': 'localhost',
-            'database': 'rmt_game'
-        }
-
+        # Parametri za povezivanje sa mySQL bazom se citaju iz config.ini fajla
+        config_data = configparser.ConfigParser()
+        config_data.read("config.ini")
+        dbparams = config_data["database"]
+        
         # Povezivanje sa bazom
         try:
-            self.cnx = mysql.connector.connect(**config)
+            self.cnx = mysql.connector.connect(**dbparams)
         except mysql.connector.Error as err:
             if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
                 print("Something is wrong with your user name or password")
