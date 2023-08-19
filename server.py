@@ -2,11 +2,15 @@ import socket
 from _thread import *
 import threading
 import sys
+import configparser
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-server = 'localhost'
-port = 5555
+config_data = configparser.ConfigParser()
+config_data.read("config.ini")
+config = config_data["network"]
+server = config.get("host")
+port = int(config.get("port"))
 
 server_ip = socket.gethostbyname(server)
 
@@ -24,6 +28,7 @@ print("Waiting for a connection...")
 default_pos = ["0:300;400;300;0;0", "1:300;400;300;0;0"]
 pos = default_pos
 
+
 players = [None, None]
 def addPlayer(id):
     if players[0] is None:
@@ -33,10 +38,10 @@ def addPlayer(id):
         players[1] = id
         return "1"
 def removePlayer(id):
-    #global pos
-    #pos = default_pos
     players[players.index(id)] = None
     
+
+
 
 def threaded_client(conn):
     global pos
