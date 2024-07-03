@@ -3,30 +3,6 @@ from _thread import *
 import threading
 import configparser
 
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-config_data = configparser.ConfigParser()
-config_data.read("config.ini")
-config = config_data["network"]
-server = config.get("host")
-port = int(config.get("port"))
-
-server_ip = socket.gethostbyname(server)
-
-try:
-    s.bind((server, port))
-
-except socket.error as e:
-    print(str(e))
-
-s.listen(2)
-print("Waiting for a connection...")
-
-default_pos = ["0:300;400;300;0;0", "1:300;400;300;0;0"]
-pos = default_pos
-
-players = [None, None]
-
 
 def addPlayer(id):
     if players[0] is None:
@@ -44,8 +20,8 @@ def removePlayer(id):
 def threaded_client(conn):
     global pos
 
-    newId = addPlayer(threading.current_thread().ident)
-    conn.send(str.encode(newId))
+    new_id = addPlayer(threading.current_thread().ident)
+    conn.send(str.encode(new_id))
 
     while True:
         try:
@@ -55,14 +31,10 @@ def threaded_client(conn):
                 conn.send(str.encode("Goodbye"))
                 break
             else:
-
                 arr = reply.split(";")
                 id = int(arr[0])
                 pos[id] = reply
-
-                if id == 0: nid = 1
-                if id == 1: nid = 0
-
+                nid = id ^ 1
                 reply = pos[nid][:]
 
             conn.sendall(str.encode(reply))
@@ -74,8 +46,32 @@ def threaded_client(conn):
     conn.close()
 
 
-while True:
-    conn, addr = s.accept()
-    print("Connected to: ", addr)
+if __name__ == '__main__':
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-    start_new_thread(threaded_client, (conn,))
+    config_data = configparser.ConfigParser()
+    config_data.read("config.ini")
+    config = config_data["network"]
+    server = config.get("host")
+    port = int(config.get("port"))
+
+    server_ip = socket.gethostbyname(server)
+
+    try:
+        s.bind((server, port))
+
+    except socket.error as e:
+        print(str(e))
+
+    s.listen(2)
+    print("Waiting for a connection...")
+
+    pos = ["0:300;400;300;0;0", "1:300;400;300;0;0"]
+
+    players = [None, None]
+
+    while True:
+        conn, addr = s.accept()
+        print("Connected to: ", addr)
+
+        start_new_thread(threaded_client, (conn,))
