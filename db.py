@@ -3,14 +3,18 @@ from mysql.connector import errorcode
 import configparser
 
 
-class DB():
+class DB:
+
+    def __init__(self):
+        self.cursor = None
+        self.cnx = None
 
     def connect(self):
         # Parametri za povezivanje sa mySQL bazom se citaju iz config.ini fajla
         config_data = configparser.ConfigParser()
         config_data.read("config.ini")
         dbparams = config_data["database"]
-        
+
         # Povezivanje sa bazom
         try:
             self.cnx = mysql.connector.connect(**dbparams)
@@ -24,10 +28,8 @@ class DB():
 
         self.cursor = self.cnx.cursor()
 
-
     def disconnect(self):
         self.cnx.close()
-
 
     # dodaje novi red (korisnika) u tabelu na osnovu user i pass
     # ako vec postoji user, SQL vraca error 
@@ -44,13 +46,11 @@ class DB():
         self.cnx.commit()
         return 'success'
 
-
-
     def checkIfExist(self, usr, pas):
         # Uzmi red sa datim username-om
         self.cursor.execute(f"SELECT username, password, active FROM user WHERE username = '{usr}'")
         row = self.cursor.fetchall()
-        
+
         # Nije nasao korisnika
         if not row:
             return 'Username not found, please register!'
@@ -63,7 +63,6 @@ class DB():
         else:
             return 'success'
 
-
     # postavi active flag (1 - aktivan, 0 - neaktivan)
     # pretpostavlja da je user vec unet
     def setActive(self, usr, act=1):
@@ -72,5 +71,3 @@ class DB():
 
     def removeActive(self, usr):
         self.setActive(usr, 0)
-        
-    

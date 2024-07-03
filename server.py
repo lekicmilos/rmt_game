@@ -1,7 +1,6 @@
 import socket
 from _thread import *
 import threading
-import sys
 import configparser
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -23,13 +22,12 @@ except socket.error as e:
 s.listen(2)
 print("Waiting for a connection...")
 
-
-
 default_pos = ["0:300;400;300;0;0", "1:300;400;300;0;0"]
 pos = default_pos
 
-
 players = [None, None]
+
+
 def addPlayer(id):
     if players[0] is None:
         players[0] = id
@@ -37,19 +35,18 @@ def addPlayer(id):
     else:
         players[1] = id
         return "1"
+
+
 def removePlayer(id):
     players[players.index(id)] = None
-    
-
 
 
 def threaded_client(conn):
     global pos
-    
+
     newId = addPlayer(threading.current_thread().ident)
     conn.send(str.encode(newId))
 
-    reply = ''
     while True:
         try:
             data = conn.recv(2048)
@@ -71,11 +68,10 @@ def threaded_client(conn):
             conn.sendall(str.encode(reply))
         except:
             break
-    
+
     print("Connection Closed")
     removePlayer(threading.current_thread().ident)
     conn.close()
-
 
 
 while True:
